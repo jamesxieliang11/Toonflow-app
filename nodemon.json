@@ -1,0 +1,14 @@
+{
+  "watch": ["src"],
+  "ext": "ts,json",
+  "ignore": [
+    "src/router.ts",
+    "node_modules",
+    "build",
+    "dist",
+    "uploads",
+    "*.test.ts",
+    "*.spec.ts"
+  ],
+  "delay": 1000
+}

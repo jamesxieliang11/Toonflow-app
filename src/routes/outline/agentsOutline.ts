@@ -112,9 +112,10 @@ router.ws("/", async (ws, req) => {
         default:
           break;
       }
-    } catch (e) {
-      ws.send(JSON.stringify({ type: "error", data: "数据解析/脚本生成异常" }));
-      console.error(e);
+    } catch (e: any) {
+      const errorMessage = e?.message || String(e) || "未知错误";
+      ws.send(JSON.stringify({ type: "error", data: errorMessage }));
+      console.error("[agentsOutline] 异常:", e);
     }
   });
 

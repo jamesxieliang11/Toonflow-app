@@ -43,18 +43,26 @@ const buildOptions = async (input: AIInput<any>, config: AIConfig = {}) => {
       return Output.object({ schema: z.object(s) });
     },
     object: () => {
-      const jsonSchemaPrompt = `\n请按照以下 JSON Schema 格式返回结果:\n${JSON.stringify(
+      const jsonSchemaPrompt = `\n请按照以下 JSON Schema 格式返回 json 结果:\n${JSON.stringify(
         z.toJSONSchema(z.object(input.output)),
         null,
         2,
-      )}\n只返回结果，不要将Schema返回。`;
+      )}\n只返回 json 结果，不要将Schema返回。`;
       input.system = (input.system ?? "") + jsonSchemaPrompt;
+      // 部分模型（如通义千问）要求 messages 中必须包含 "json" 关键词才能使用 json_object response_format，
+      // 因此在 messages 最后追加一条提示，确保兼容性
+      if (input.messages && input.messages.length > 0) {
+        const lastMessage = input.messages[input.messages.length - 1];
+        if (lastMessage.role === "user" && typeof lastMessage.content === "string") {
+          lastMessage.content += "\n请以 json 格式返回结果。";
+        }
+      }
       // return Output.json();
     },
   };
 
   const output = input.output ? (outputBuilders[owned.responseFormat]?.(input.output) ?? null) : null;
-  const chatModelManufacturer = ["volcengine", "other", "openai", "modelScope","grsai"];
+  const chatModelManufacturer = ["volcengine", "other", "openai", "modelScope", "grsai", "qwen"];
   const modelFn = chatModelManufacturer.includes(owned.manufacturer) ? (modelInstance as OpenAIProvider).chat(model!) : modelInstance(model!);
 
   return {

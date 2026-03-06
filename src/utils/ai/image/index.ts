@@ -11,6 +11,7 @@ import apimart from "./owned/apimart";
 import other from "./owned/other";
 import gemini from "./owned/gemini";
 import modelScope from "./owned/modelScope";
+import qwen from "./owned/qwen";
 import grsai from "./owned/grsai";
 
 const urlToBase64 = async (url: string): Promise<string> => {
@@ -28,6 +29,7 @@ const modelInstance = {
   runninghub: runninghub,
   // apimart: apimart,
   modelScope,
+  qwen,
   other,
   grsai
 } as const;

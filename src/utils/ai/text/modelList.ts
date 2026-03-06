@@ -29,7 +29,7 @@ const instanceMap = {
   volcengine: createOpenAI,
   openai: createOpenAI,
   zhipu: createZhipu,
-  qwen: createQwen,
+  qwen: createOpenAI,
   gemini: createGoogleGenerativeAI,
   anthropic: createAnthropic,
   modelScope: (options: OpenAIProviderSettings) => createOpenAI({ ...options, headers: { ...options?.headers, "X-ModelScope-Async-Mode": "true" } }),
@@ -211,7 +211,7 @@ const modelList: Owned[] = [
     responseFormat: "schema",
     image: true,
     think: false,
-    instance: createQwen,
+    instance: createOpenAI,
     tool: true,
   },
   {
@@ -220,7 +220,7 @@ const modelList: Owned[] = [
     responseFormat: "schema",
     image: false,
     think: false,
-    instance: createQwen,
+    instance: createOpenAI,
     tool: true,
   },
   {
@@ -229,7 +229,7 @@ const modelList: Owned[] = [
     responseFormat: "schema",
     image: false,
     think: false,
-    instance: createQwen,
+    instance: createOpenAI,
     tool: true,
   },
   {
@@ -238,7 +238,7 @@ const modelList: Owned[] = [
     responseFormat: "schema",
     image: false,
     think: false,
-    instance: createQwen,
+    instance: createOpenAI,
     tool: true,
   },
   {
@@ -247,7 +247,7 @@ const modelList: Owned[] = [
     responseFormat: "schema",
     image: false,
     think: false,
-    instance: createQwen,
+    instance: createOpenAI,
     tool: true,
   },
   {
@@ -256,7 +256,7 @@ const modelList: Owned[] = [
     responseFormat: "schema",
     image: true,
     think: false,
-    instance: createQwen,
+    instance: createOpenAI,
     tool: true,
   },
   // OpenAI

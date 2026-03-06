@@ -31,13 +31,10 @@ export default router.post(
       },
     });
     try {
-      const { reply } = await u.ai.text.invoke(
+      const result = await u.ai.text.invoke(
         {
           prompt: "请调用工具获取北京的天气，并回答我多少气温",
           tools: { getWeatherTool },
-          output: {
-            reply: z.string().describe("回复内容"),
-          },
         },
         {
           model: modelName,
@@ -46,7 +43,7 @@ export default router.post(
           manufacturer,
         },
       );
-      res.status(200).send(success(reply));
+      res.status(200).send(success(result.text));
     } catch (err) {
       const msg = u.error(err).message;
       console.error(msg);
