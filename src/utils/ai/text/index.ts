@@ -49,19 +49,24 @@ const buildOptions = async (input: AIInput<any>, config: AIConfig = {}) => {
         2,
       )}\n只返回 json 结果，不要将Schema返回。`;
       input.system = (input.system ?? "") + jsonSchemaPrompt;
-      // 部分模型（如通义千问）要求 messages 中必须包含 "json" 关键词才能使用 json_object response_format，
-      // 因此在 messages 最后追加一条提示，确保兼容性
-      if (input.messages && input.messages.length > 0) {
-        const lastMessage = input.messages[input.messages.length - 1];
-        if (lastMessage.role === "user" && typeof lastMessage.content === "string") {
-          lastMessage.content += "\n请以 json 格式返回结果。";
-        }
-      }
       // return Output.json();
     },
   };
 
   const output = input.output ? (outputBuilders[owned.responseFormat]?.(input.output) ?? null) : null;
+
+  // 部分模型（如通义千问）要求 messages 中必须包含 "json" 关键词才能使用 json_object response_format，
+  // 当存在 output schema 时（无论 schema 还是 object 模式），确保 messages 中包含 "json"
+  if (input.output && input.messages && input.messages.length > 0) {
+    const messagesText = input.messages.map((m) => (typeof m.content === "string" ? m.content : "")).join(" ");
+    if (!messagesText.toLowerCase().includes("json")) {
+      const lastMessage = input.messages[input.messages.length - 1];
+      if (lastMessage.role === "user" && typeof lastMessage.content === "string") {
+        lastMessage.content += "\n请以 json 格式返回结果。";
+      }
+    }
+  }
+
   const chatModelManufacturer = ["volcengine", "other", "openai", "modelScope", "grsai", "qwen"];
   const modelFn = chatModelManufacturer.includes(owned.manufacturer) ? (modelInstance as OpenAIProvider).chat(model!) : modelInstance(model!);
 
