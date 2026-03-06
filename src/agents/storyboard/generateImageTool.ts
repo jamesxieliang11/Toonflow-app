@@ -204,12 +204,14 @@ async function filterRelevantAssets(prompts: string[], allResources: ResourceIte
   }
 
   const apiConfig = await u.getPromptAi("storyboardAgent");
-  const { relevantAssets } = await u.ai.text.invoke(
-    {
-      messages: [
-        {
-          role: "user",
-          content: `请分析以下分镜描述，从可用资产中筛选出与分镜内容直接相关的资产。
+
+  try {
+    const { relevantAssets } = await u.ai.text.invoke(
+      {
+        messages: [
+          {
+            role: "user",
+            content: `请分析以下分镜描述，从可用资产中筛选出与分镜内容直接相关的资产。
 
 分镜描述：
 ${prompts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
@@ -218,30 +220,34 @@ ${prompts.map((p, i) => `${i + 1}. ${p}`).join("\n")}
 ${availableResources.map((r) => `- ${r.name}：${r.intro}`).join("\n")}
 
 请仅选择在分镜中明确出现或被提及的角色、场景、道具。不要选择与分镜内容无关的资产。`,
+          },
+        ],
+        output: {
+          relevantAssets: z
+            .array(
+              z.object({
+                name: z.string().describe("资产名称"),
+                reason: z.string().describe("选择该资产的原因"),
+              }),
+            )
+            .describe("与分镜内容相关的资产列表"),
         },
-      ],
-      output: {
-        relevantAssets: z
-          .array(
-            z.object({
-              name: z.string().describe("资产名称"),
-              reason: z.string().describe("选择该资产的原因"),
-            }),
-          )
-          .describe("与分镜内容相关的资产列表"),
       },
-    },
-    apiConfig,
-  );
+      apiConfig,
+    );
 
-  if (!relevantAssets || relevantAssets.length === 0) {
+    if (!relevantAssets || relevantAssets.length === 0) {
+      return availableImages;
+    }
+
+    const relevantNames = new Set(relevantAssets.map((a) => a.name));
+    const filteredImages = availableImages.filter((img) => relevantNames.has(img.name));
+
+    return filteredImages.length > 0 ? filteredImages : availableImages;
+  } catch (error) {
+    console.warn("[filterRelevantAssets] AI 资产过滤失败，使用全部可用资产:", error instanceof Error ? error.message : error);
     return availableImages;
   }
-
-  const relevantNames = new Set(relevantAssets.map((a) => a.name));
-  const filteredImages = availableImages.filter((img) => relevantNames.has(img.name));
-
-  return filteredImages.length > 0 ? filteredImages : availableImages;
 }
 
 // 构建资产映射提示词
